@@ -38,15 +38,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String sListOfLastNames = "";
-  String sListOfFirstNames = "";
-  var lastNames = [];
-  var firstNames = [];
   String sPhoneNumberTemplate = "";
   String sEmailAddressTemplate = "";
+  var arrbFieldSelections = [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ]; // aray of bools
+  static const FIELD_WORKFAX = 0;
+  static const FIELD_HOMEFAX = 1;
+  static const FIELD_CUSTOMEMAIL = 2;
+  static const FIELD_COMPANY = 3;
+  static const FIELD_TITLE = 4;
+  static const FIELD_AVATAR = 5;
+  static const FIELD_BIRTHDAY = 6;
 
-  Key keyLastNames = Key("LastNames");
-  Key keyFirstNames = Key("FirstNames");
   Key keyPhoneNumberTemplate = Key("PhoneNumberTemplate");
   Key keyEmailAddressTemplate = Key("EmailAddressTemplate");
 
@@ -54,95 +64,47 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController emailAddressTemplateController =
       TextEditingController();
 
-  Future<String> getLastNames() async {
-    log("getLastNames: called");
-    SharedPreferences prefs;
-
-    prefs = await SharedPreferences.getInstance();
-    final String sValue = prefs.getString('sListOfLastNames');
-    sListOfLastNames = sValue;
-    // to create the array of names
-    _changedLastNames(sListOfLastNames);
-    return sValue;
-  }
-
-  Future<String> getFirstNames() async {
-    log("getFirstNames: called");
-    SharedPreferences prefs;
-
-    prefs = await SharedPreferences.getInstance();
-    final String sValue = prefs.getString('sListOfFirstNames');
-    sListOfFirstNames = sValue;
-    // to create the array of names
-    _changedFirstNames(sListOfFirstNames);
-    return sValue;
-  }
-
-  Future<String> getPhoneNumberTemplate() async {
-    log("getPhoneNumberTemplate: called");
-    SharedPreferences prefs;
-
-    prefs = await SharedPreferences.getInstance();
-    final String sValue = prefs.getString('sPhoneNumberTemplate');
-    sPhoneNumberTemplate = sValue;
-    return sValue;
-  }
-
-  Future<String> getEmailAddressTemplate() async {
-    log("getEmailAddressTemplate: called");
-    SharedPreferences prefs;
-
-    prefs = await SharedPreferences.getInstance();
-    final String sValue = prefs.getString('sEmailAddressTemplate');
-    sEmailAddressTemplate = sValue;
-    return sValue;
-  }
-
   Future<void> getStoredSettings() async {
     log("getStoredSettings: called");
     SharedPreferences prefs;
 
     prefs = await SharedPreferences.getInstance();
-    sListOfLastNames = prefs.getString('sListOfLastNames');
+    sPhoneNumberTemplate = prefs.getString('sPhoneNumberTemplate');
     //log("getStoredSettings: retrieved last names " + (sListOfLastNames ?? "null"));
-    if (sListOfLastNames == null) {
-      sListOfLastNames =
-          "Zen,Zaragoza,Zabinski,Zimmermann,Zapata,Zona,Zidane,Zeiss,Zimmer,Zaal,Zaman,Zambrano,Zanetti,Zangari,Zappa,Zavala,Zawisza,Zeegers,Zelenka,Zellweger,Zeni,Zhang,Zhao,Zheng,Zhou,Ziegler,Zima";
-      sListOfFirstNames =
-          "Zoe,Zach,Zbigniew,Zaire,Zero,Zakai,Zamir,Zan,Zanna,Zareen,Zeb,Zeki,Zelda,Zella,Zeno,Zephyr,Zhen,Zhi,Zhong,Zhu,Ziba,Ziggy,Zion,Zola,Zolyan,Zora,Zsazsa,Zuzana";
+    if (sPhoneNumberTemplate == null) {
       sPhoneNumberTemplate = "+2134567nnnn";
       sEmailAddressTemplate = "FIRST.LAST@example.com";
-      saveLastNames();
-      saveFirstNames();
+      arrbFieldSelections = [false, false, false, false, false, false, false];
       savePhoneNumberTemplate();
       saveEmailAddressTemplate();
+      saveFieldSelections(true);
     } else {
-      sListOfFirstNames = prefs.getString('sListOfFirstNames');
       sPhoneNumberTemplate = prefs.getString('sPhoneNumberTemplate');
       sEmailAddressTemplate = prefs.getString('sEmailAddressTemplate');
+      arrbFieldSelections[0] = prefs.getBool('sFieldSelection0');
+      arrbFieldSelections[1] = prefs.getBool('sFieldSelection1');
+      arrbFieldSelections[2] = prefs.getBool('sFieldSelection2');
+      arrbFieldSelections[3] = prefs.getBool('sFieldSelection3');
+      arrbFieldSelections[4] = prefs.getBool('sFieldSelection4');
+      arrbFieldSelections[5] = prefs.getBool('sFieldSelection5');
+      arrbFieldSelections[6] = prefs.getBool('sFieldSelection6');
     }
-
-    // create the arrays of names
-    lastNames = sListOfLastNames.split(",");
-    firstNames = sListOfFirstNames.split(",");
 
     phoneNumberTemplateController.text = sPhoneNumberTemplate;
     emailAddressTemplateController.text = sEmailAddressTemplate;
   }
 
-  void saveLastNames() async {
-    log("saveLastNames: called");
+  void saveFieldSelections(bool bIgnored) async {
+    log("saveFieldSelections: called");
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    log("saveLastNames: sListOfLastNames " + sListOfLastNames);
-    await prefs.setString("sListOfLastNames", sListOfLastNames);
-  }
-
-  void saveFirstNames() async {
-    log("saveFirstNames: called");
-
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("sListOfFirstNames", sListOfFirstNames);
+    await prefs.setBool("bFieldSelection0", arrbFieldSelections[0]);
+    await prefs.setBool("bFieldSelection1", arrbFieldSelections[1]);
+    await prefs.setBool("bFieldSelection2", arrbFieldSelections[2]);
+    await prefs.setBool("bFieldSelection3", arrbFieldSelections[3]);
+    await prefs.setBool("bFieldSelection4", arrbFieldSelections[4]);
+    await prefs.setBool("bFieldSelection5", arrbFieldSelections[5]);
+    await prefs.setBool("bFieldSelection6", arrbFieldSelections[6]);
   }
 
   void savePhoneNumberTemplate() async {
@@ -192,92 +154,40 @@ class _MyHomePageState extends State<MyHomePage> {
         .replaceAll("LAST", sLastName);
   }
 
-  Future<void> _createAllContacts() async {
-    log("_createAllContacts: about to call Permission.contacts.request");
-    PermissionStatus permission = await Permission.contacts.request();
-
-    if (!permission.isGranted) {
-      log("_createAllContacts: no permission");
-    } else {
-      // Either the permission was already granted before or the user just granted it.
-
-      for (var i = 0; i < lastNames.length; i++) {
-        for (var j = 0; j < firstNames.length; j++) {
-          Contact newContact = Contact(
-              displayName: (firstNames[j] + " " + lastNames[i]),
-              givenName: firstNames[j],
-              familyName: lastNames[i]);
-          newContact.phones = [
-            Item(label: "mobile", value: generatePhoneNumber(lastNames[i]))
-          ];
-          newContact.emails = [
-            Item(
-                label: "email",
-                value: generateEmailAddress(lastNames[i], firstNames[j]))
-          ];
-          log("_createAllContacts: about to call ContactsService.addContact(" +
-              newContact.displayName +
-              ")");
-          // if Contact exists already, no error, another of same name is added
-          await ContactsService.addContact(newContact);
-        }
-      }
-    }
-    log("_createAllContacts: about to return");
-  }
-
-  Future<void> _deleteAllContacts() async {
-    log("_deleteAllContacts: about to call Permission.contacts.request");
+  Future<void> _scanFieldsOfAllContacts() async {
+    log("_scanFieldsOfAllContacts: about to call Permission.contacts.request");
     PermissionStatus permission = await Permission.contacts.request();
     if (!permission.isGranted) {
-      log("_deleteAllContacts: no permission");
+      log("_scanFieldsOfAllContacts: no permission");
     } else {
       // Either the permission was already granted before or the user just granted it.
-      for (var i = 0; i < lastNames.length; i++) {
-        for (var j = 0; j < firstNames.length; j++) {
-          Contact newContact = Contact(
-              displayName: (firstNames[j] + " " + lastNames[i]),
-              givenName: firstNames[j],
-              familyName: lastNames[i]);
-          log("_deleteAllContacts: about to call ContactsService.getContacts(" +
-              newContact.displayName +
-              ")");
-          Iterable<Contact> iContacts =
-              await ContactsService.getContacts(query: newContact.displayName);
-          for (var c in iContacts) {
-            log("_deleteAllContacts: about to call ContactsService.deleteContact(" +
-                newContact.displayName +
-                ")");
-            await ContactsService.deleteContact(c);
-          }
-        }
+      log("_scanFieldsOfAllContacts: about to call ContactsService.getContacts");
+      //Iterable<Contact> iContacts = await ContactsService.getContacts();
+      Iterable<Contact> iContacts = null;
+      for (var c in iContacts) {
+        log("_scanFieldsOfAllContacts: 1 !!!");
+        await ContactsService.deleteContact(c); // !!!
       }
     }
-    log("_deleteAllContacts: about to return");
+    log("_scanFieldsOfAllContacts: about to return");
   }
 
-  // this gets called every time a char gets changed in the field
-  // wasteful to recalculate every time, but doesn't matter
-  void _changedLastNames(String sNewValue) {
-    log("_changedLastNames: called, " + sNewValue);
-    sListOfLastNames = sNewValue;
-    lastNames = sListOfLastNames.split(",");
-    //log("_changedLastNames: lastNames[0] == " + lastNames[0]);
-    //log("_changedLastNames: lastNames.toString == " + lastNames.toString());
-
-    saveLastNames();
-  }
-
-  // this gets called every time a char gets changed in the field
-  // wasteful to recalculate and save every time
-  void _changedFirstNames(String sNewValue) {
-    log("_changedFirstNames: called, " + sNewValue);
-    sListOfFirstNames = sNewValue;
-    firstNames = sListOfFirstNames.split(",");
-    //log("_changedFirstNames: firstNames[0] == " + firstNames[0]);
-    //log("_changedFirstNames: firstNames.toString == " + firstNames.toString());
-
-    saveFirstNames();
+  Future<void> _setFieldsOfAllContacts(bool bSet) async {
+    log("_setFieldsOfAllContacts: about to call Permission.contacts.request");
+    PermissionStatus permission = await Permission.contacts.request();
+    if (!permission.isGranted) {
+      log("_setFieldsOfAllContacts: no permission");
+    } else {
+      // Either the permission was already granted before or the user just granted it.
+      log("_setFieldsOfAllContacts: about to call ContactsService.getContacts");
+      //Iterable<Contact> iContacts = await ContactsService.getContacts();
+      Iterable<Contact> iContacts = null;
+      for (var c in iContacts) {
+        log("_setFieldsOfAllContacts: 1 !!!");
+        await ContactsService.deleteContact(c); // !!!
+      }
+    }
+    log("_setFieldsOfAllContacts: about to return");
   }
 
   // this gets called every time a char gets changed in the field
@@ -296,10 +206,59 @@ class _MyHomePageState extends State<MyHomePage> {
     saveEmailAddressTemplate();
   }
 
-  final ROWHEIGHT = 25.0;
-  final TEXTSIZE = 17.0;
-  final BEFORECHECKBOX = 5.0;
-  final AFTERCHECKBOX = 2.0;
+  // this gets called every time a check-box gets changed
+  void _changedFieldSelections(int nIndex, bool bNewValue) {
+    log("_changedEmailAddressTemplate: called, nIndex " +
+        nIndex.toString() +
+        ", bNewValue " +
+        bNewValue.toString());
+    arrbFieldSelections[nIndex] = bNewValue;
+
+    saveFieldSelections(true);
+  }
+
+  void onWorkFaxCheckboxChanged(bool bNewValue) {
+    log("onWorkFaxCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_WORKFAX] = bNewValue;
+  }
+
+  void onHomeFaxCheckboxChanged(bool bNewValue) {
+    log("onHomeFaxCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_HOMEFAX] = bNewValue;
+  }
+
+  void onCustomEmailCheckboxChanged(bool bNewValue) {
+    log("onCustomEmailCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_CUSTOMEMAIL] = bNewValue;
+  }
+
+  void onCompanyCheckboxChanged(bool bNewValue) {
+    log("onCompanyCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_COMPANY] = bNewValue;
+  }
+
+  void onTitleCheckboxChanged(bool bNewValue) {
+    log("onTitleCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_TITLE] = bNewValue;
+  }
+
+  void onAvatarCheckboxChanged(bool bNewValue) {
+    log("onAvatarCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_AVATAR] = bNewValue;
+  }
+
+  void onBirthdayCheckboxChanged(bool bNewValue) {
+    log("onBirthdayCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_BIRTHDAY] = bNewValue;
+  }
+
+
+
+  static const ROWHEIGHT = 25.0;
+  static const TEXTBOXWIDTH = 225.0;
+  static const TEXTSIZE = 17.0;
+  static const BEFORECHECKBOX = 5.0;
+  static const AFTERCHECKBOX = 2.0;
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-              onPressed: () => _deleteAllContacts(),
+              onPressed: () => _scanFieldsOfAllContacts(),
               child: Text("Select Unused Fields"),
               style: ButtonStyle(
                   backgroundColor:
@@ -332,12 +291,11 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 children: <Widget>[
                   SizedBox(width: BEFORECHECKBOX), //SizedBox
-                  /** Checkbox Widget **/
                   Checkbox(
-                    value: true,
+                    value: arrbFieldSelections[FIELD_WORKFAX],
                     onChanged: (bool value) {
                       setState(() {
-                        //this.value = value;
+                        onWorkFaxCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
@@ -354,12 +312,11 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 children: <Widget>[
                   SizedBox(width: BEFORECHECKBOX), //SizedBox
-                  /** Checkbox Widget **/
                   Checkbox(
-                    value: true,
+                    value: arrbFieldSelections[FIELD_HOMEFAX],
                     onChanged: (bool value) {
                       setState(() {
-                        //this.value = value;
+                        onHomeFaxCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
@@ -374,6 +331,7 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(height: 5),
             Container(
               height: ROWHEIGHT,
+              width: TEXTBOXWIDTH,
               child: TextFormField(
                 key: keyPhoneNumberTemplate,
                 onChanged: _changedPhoneNumberTemplate,
@@ -398,12 +356,11 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 children: <Widget>[
                   SizedBox(width: BEFORECHECKBOX), //SizedBox
-                  /** Checkbox Widget **/
                   Checkbox(
-                    value: true,
+                    value: arrbFieldSelections[FIELD_CUSTOMEMAIL],
                     onChanged: (bool value) {
                       setState(() {
-                        //this.value = value;
+                        onCustomEmailCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
@@ -418,6 +375,7 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(height: 5),
             Container(
               height: ROWHEIGHT,
+              width: TEXTBOXWIDTH,
               child: TextFormField(
                 key: keyEmailAddressTemplate,
                 onChanged: _changedEmailAddressTemplate,
@@ -442,12 +400,11 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 children: <Widget>[
                   SizedBox(width: BEFORECHECKBOX), //SizedBox
-                  /** Checkbox Widget **/
                   Checkbox(
-                    value: true,
+                    value: arrbFieldSelections[FIELD_COMPANY],
                     onChanged: (bool value) {
                       setState(() {
-                        //this.value = value;
+                        onCompanyCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
@@ -468,10 +425,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ), //SizedBox
                   /** Checkbox Widget **/
                   Checkbox(
-                    value: true,
+                    value: arrbFieldSelections[FIELD_TITLE],
                     onChanged: (bool value) {
                       setState(() {
-                        //this.value = value;
+                        onTitleCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
@@ -492,10 +449,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ), //SizedBox
                   /** Checkbox Widget **/
                   Checkbox(
-                    value: true,
+                    value: arrbFieldSelections[FIELD_AVATAR],
                     onChanged: (bool value) {
                       setState(() {
-                        //this.value = value;
+                        onAvatarCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
@@ -516,10 +473,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ), //SizedBox
                   /** Checkbox Widget **/
                   Checkbox(
-                    value: true,
+                    value: arrbFieldSelections[FIELD_BIRTHDAY],
                     onChanged: (bool value) {
                       setState(() {
-                        //this.value = value;
+                        onBirthdayCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
@@ -535,7 +492,7 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 30,
             ),
             ElevatedButton(
-              onPressed: () => _deleteAllContacts(),
+              onPressed: () => _setFieldsOfAllContacts(true),
               child: Text("Fill Selected Fields"),
               style: ButtonStyle(
                   backgroundColor:
@@ -545,7 +502,7 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 20,
             ),
             ElevatedButton(
-              onPressed: () => _deleteAllContacts(),
+              onPressed: () => _setFieldsOfAllContacts(true),
               child: Text("Clear Selected Fields"),
               style: ButtonStyle(
                   backgroundColor:
