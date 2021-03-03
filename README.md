@@ -2,6 +2,8 @@
 
 Android phone app that puts fake information in unused fields of your phone contacts.  This feeds fake data to any apps or companies who are copying our private data to use or sell it.  This is called "data-poisoning".
 
+[NOT READY YET !!! DO NOT USE !!!]
+
 ![Do not use](https://www.billdietrich.me/AbnormalBrain.jpg "Do not use")
 
 The app will be available through F-Droid.
