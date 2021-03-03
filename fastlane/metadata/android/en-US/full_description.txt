@@ -1,0 +1,1 @@
+Put fake information in unused fields in phone contacts.  The idea is to feed fake data to any apps or companies who are copying our private data to use or sell it.  This is called "data-poisoning".
