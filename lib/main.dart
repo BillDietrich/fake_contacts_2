@@ -1,5 +1,6 @@
 //import 'dart:convert';
 import 'dart:developer';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -81,13 +82,13 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       sPhoneNumberTemplate = prefs.getString('sPhoneNumberTemplate');
       sEmailAddressTemplate = prefs.getString('sEmailAddressTemplate');
-      arrbFieldSelections[0] = prefs.getBool('sFieldSelection0');
-      arrbFieldSelections[1] = prefs.getBool('sFieldSelection1');
-      arrbFieldSelections[2] = prefs.getBool('sFieldSelection2');
-      arrbFieldSelections[3] = prefs.getBool('sFieldSelection3');
-      arrbFieldSelections[4] = prefs.getBool('sFieldSelection4');
-      arrbFieldSelections[5] = prefs.getBool('sFieldSelection5');
-      arrbFieldSelections[6] = prefs.getBool('sFieldSelection6');
+      arrbFieldSelections[0] = prefs.getBool('bFieldSelection0');
+      arrbFieldSelections[1] = prefs.getBool('bFieldSelection1');
+      arrbFieldSelections[2] = prefs.getBool('bFieldSelection2');
+      arrbFieldSelections[3] = prefs.getBool('bFieldSelection3');
+      arrbFieldSelections[4] = prefs.getBool('bFieldSelection4');
+      arrbFieldSelections[5] = prefs.getBool('bFieldSelection5');
+      arrbFieldSelections[6] = prefs.getBool('bFieldSelection6');
     }
 
     phoneNumberTemplateController.text = sPhoneNumberTemplate;
@@ -162,11 +163,18 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       // Either the permission was already granted before or the user just granted it.
       log("_scanFieldsOfAllContacts: about to call ContactsService.getContacts");
-      //Iterable<Contact> iContacts = await ContactsService.getContacts();
-      Iterable<Contact> iContacts = null;
+      Iterable<Contact> iContacts = await ContactsService.getContacts();
+      log("_scanFieldsOfAllContacts: iContacts.length " + iContacts.length.toString());
       for (var c in iContacts) {
-        log("_scanFieldsOfAllContacts: 1 !!!");
-        await ContactsService.deleteContact(c); // !!!
+        log("_scanFieldsOfAllContacts: givenName " + c.givenName);
+        Iterable<Item> iEmails = c.emails;
+        log("_scanFieldsOfAllContacts: iEmails " + iEmails.toString());
+        Iterable<Item> iPhones = c.phones;
+        Iterable<PostalAddress> iAddresses = c.postalAddresses;
+        String sCompany = c.company;
+        String sTitle = c.jobTitle;
+        //List<Uint8> uAvatar = c.avatar;
+        //Uint8List lAvatar = c.avatar.;
       }
     }
     log("_scanFieldsOfAllContacts: about to return");
@@ -184,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Iterable<Contact> iContacts = null;
       for (var c in iContacts) {
         log("_setFieldsOfAllContacts: 1 !!!");
-        await ContactsService.deleteContact(c); // !!!
+        //await ContactsService.deleteContact(c); // !!!
       }
     }
     log("_setFieldsOfAllContacts: about to return");
@@ -220,36 +228,43 @@ class _MyHomePageState extends State<MyHomePage> {
   void onWorkFaxCheckboxChanged(bool bNewValue) {
     log("onWorkFaxCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_WORKFAX] = bNewValue;
+    saveFieldSelections(true);
   }
 
   void onHomeFaxCheckboxChanged(bool bNewValue) {
     log("onHomeFaxCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_HOMEFAX] = bNewValue;
+    saveFieldSelections(true);
   }
 
   void onCustomEmailCheckboxChanged(bool bNewValue) {
     log("onCustomEmailCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_CUSTOMEMAIL] = bNewValue;
+    saveFieldSelections(true);
   }
 
   void onCompanyCheckboxChanged(bool bNewValue) {
     log("onCompanyCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_COMPANY] = bNewValue;
+    saveFieldSelections(true);
   }
 
   void onTitleCheckboxChanged(bool bNewValue) {
     log("onTitleCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_TITLE] = bNewValue;
+    saveFieldSelections(true);
   }
 
   void onAvatarCheckboxChanged(bool bNewValue) {
     log("onAvatarCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_AVATAR] = bNewValue;
+    saveFieldSelections(true);
   }
 
   void onBirthdayCheckboxChanged(bool bNewValue) {
     log("onBirthdayCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_BIRTHDAY] = bNewValue;
+    saveFieldSelections(true);
   }
 
 
