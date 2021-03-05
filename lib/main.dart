@@ -1,6 +1,6 @@
 //import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
+//import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -50,13 +50,13 @@ class _MyHomePageState extends State<MyHomePage> {
     false,
     false
   ]; // aray of bools
-  static const FIELD_WORKFAX = 0;
-  static const FIELD_HOMEFAX = 1;
-  static const FIELD_CUSTOMEMAIL = 2;
-  static const FIELD_COMPANY = 3;
-  static const FIELD_TITLE = 4;
+  static const FIELD_PHONES = 0;
+  static const FIELD_POSTALADDRESSES = 1;
+  static const FIELD_EMAILS = 2;
+  static const FIELD_COMPANYANDTITLE = 3;
+  static const FIELD_MESSENGERS = 4;
   static const FIELD_AVATAR = 5;
-  static const FIELD_BIRTHDAY = 6;
+  static const FIELD_DATES = 6;
 
   Key keyPhoneNumberTemplate = Key("PhoneNumberTemplate");
   Key keyEmailAddressTemplate = Key("EmailAddressTemplate");
@@ -225,33 +225,33 @@ class _MyHomePageState extends State<MyHomePage> {
     saveFieldSelections(true);
   }
 
-  void onWorkFaxCheckboxChanged(bool bNewValue) {
-    log("onWorkFaxCheckboxChanged: called, bNewValue " + bNewValue.toString());
-    arrbFieldSelections[FIELD_WORKFAX] = bNewValue;
+  void onPhonesCheckboxChanged(bool bNewValue) {
+    log("onPhonesCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_PHONES] = bNewValue;
     saveFieldSelections(true);
   }
 
-  void onHomeFaxCheckboxChanged(bool bNewValue) {
-    log("onHomeFaxCheckboxChanged: called, bNewValue " + bNewValue.toString());
-    arrbFieldSelections[FIELD_HOMEFAX] = bNewValue;
+  void onAddressesCheckboxChanged(bool bNewValue) {
+    log("onAddressesCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_POSTALADDRESSES] = bNewValue;
     saveFieldSelections(true);
   }
 
-  void onCustomEmailCheckboxChanged(bool bNewValue) {
-    log("onCustomEmailCheckboxChanged: called, bNewValue " + bNewValue.toString());
-    arrbFieldSelections[FIELD_CUSTOMEMAIL] = bNewValue;
+  void onEmailsCheckboxChanged(bool bNewValue) {
+    log("onEmailsCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_EMAILS] = bNewValue;
     saveFieldSelections(true);
   }
 
-  void onCompanyCheckboxChanged(bool bNewValue) {
-    log("onCompanyCheckboxChanged: called, bNewValue " + bNewValue.toString());
-    arrbFieldSelections[FIELD_COMPANY] = bNewValue;
+  void onCompanyAndTitleCheckboxChanged(bool bNewValue) {
+    log("onCompanyAndTitleCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_COMPANYANDTITLE] = bNewValue;
     saveFieldSelections(true);
   }
 
-  void onTitleCheckboxChanged(bool bNewValue) {
-    log("onTitleCheckboxChanged: called, bNewValue " + bNewValue.toString());
-    arrbFieldSelections[FIELD_TITLE] = bNewValue;
+  void onMessengersCheckboxChanged(bool bNewValue) {
+    log("onMessengersCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_MESSENGERS] = bNewValue;
     saveFieldSelections(true);
   }
 
@@ -261,9 +261,9 @@ class _MyHomePageState extends State<MyHomePage> {
     saveFieldSelections(true);
   }
 
-  void onBirthdayCheckboxChanged(bool bNewValue) {
-    log("onBirthdayCheckboxChanged: called, bNewValue " + bNewValue.toString());
-    arrbFieldSelections[FIELD_BIRTHDAY] = bNewValue;
+  void onDatesCheckboxChanged(bool bNewValue) {
+    log("onDatesCheckboxChanged: called, bNewValue " + bNewValue.toString());
+    arrbFieldSelections[FIELD_DATES] = bNewValue;
     saveFieldSelections(true);
   }
 
@@ -307,37 +307,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   SizedBox(width: BEFORECHECKBOX), //SizedBox
                   Checkbox(
-                    value: arrbFieldSelections[FIELD_WORKFAX],
+                    value: arrbFieldSelections[FIELD_PHONES],
                     onChanged: (bool value) {
                       setState(() {
-                        onWorkFaxCheckboxChanged(value);
+                        onPhonesCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
                   SizedBox(width: AFTERCHECKBOX), //SizedBox
                   Text(
-                    'Work Fax',
-                    style: TextStyle(fontSize: TEXTSIZE),
-                  ), //Text
-                ], //<Widget>[]
-              ), //Row
-            ),
-            Container(
-              height: ROWHEIGHT,
-              child: Row(
-                children: <Widget>[
-                  SizedBox(width: BEFORECHECKBOX), //SizedBox
-                  Checkbox(
-                    value: arrbFieldSelections[FIELD_HOMEFAX],
-                    onChanged: (bool value) {
-                      setState(() {
-                        onHomeFaxCheckboxChanged(value);
-                      });
-                    },
-                  ), //Checkbox
-                  SizedBox(width: AFTERCHECKBOX), //SizedBox
-                  Text(
-                    'Home Fax',
+                    'Faxes and Secondary Phones',
                     style: TextStyle(fontSize: TEXTSIZE),
                   ), //Text
                 ], //<Widget>[]
@@ -372,16 +351,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   SizedBox(width: BEFORECHECKBOX), //SizedBox
                   Checkbox(
-                    value: arrbFieldSelections[FIELD_CUSTOMEMAIL],
+                    value: arrbFieldSelections[FIELD_EMAILS],
                     onChanged: (bool value) {
                       setState(() {
-                        onCustomEmailCheckboxChanged(value);
+                        onEmailsCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
                   SizedBox(width: AFTERCHECKBOX), //SizedBox
                   Text(
-                    'Custom Email',
+                    'Secondary Emails',
                     style: TextStyle(fontSize: TEXTSIZE),
                   ), //Text
                 ], //<Widget>[]
@@ -416,21 +395,44 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   SizedBox(width: BEFORECHECKBOX), //SizedBox
                   Checkbox(
-                    value: arrbFieldSelections[FIELD_COMPANY],
+                    value: arrbFieldSelections[FIELD_COMPANYANDTITLE],
                     onChanged: (bool value) {
                       setState(() {
-                        onCompanyCheckboxChanged(value);
+                        onCompanyAndTitleCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
                   SizedBox(width: AFTERCHECKBOX), //SizedBox
                   Text(
-                    'Company',
+                    'Company and Title',
                     style: TextStyle(fontSize: TEXTSIZE),
                   ), //Text
                 ], //<Widget>[]
               ), //Row
             ),
+            SizedBox(height: 10),
+            Container(
+              height: ROWHEIGHT,
+              child: Row(
+                children: <Widget>[
+                  SizedBox(width: BEFORECHECKBOX), //SizedBox
+                  Checkbox(
+                    value: arrbFieldSelections[FIELD_POSTALADDRESSES],
+                    onChanged: (bool value) {
+                      setState(() {
+                        onAddressesCheckboxChanged(value);
+                      });
+                    },
+                  ), //Checkbox
+                  SizedBox(width: AFTERCHECKBOX), //SizedBox
+                  Text(
+                    'Postal Addresses',
+                    style: TextStyle(fontSize: TEXTSIZE),
+                  ), //Text
+                ], //<Widget>[]
+              ), //Row
+            ),
+            SizedBox(height: 10),
             Container(
               height: ROWHEIGHT,
               child: Row(
@@ -440,21 +442,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   ), //SizedBox
                   /** Checkbox Widget **/
                   Checkbox(
-                    value: arrbFieldSelections[FIELD_TITLE],
+                    value: arrbFieldSelections[FIELD_MESSENGERS],
                     onChanged: (bool value) {
                       setState(() {
-                        onTitleCheckboxChanged(value);
+                        onMessengersCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
                   SizedBox(width: AFTERCHECKBOX), //SizedBox
                   Text(
-                    'Job Title',
+                    'Messengers',
                     style: TextStyle(fontSize: TEXTSIZE),
                   ), //Text
                 ], //<Widget>[]
               ), //Row
             ),
+            SizedBox(height: 10),
             Container(
               height: ROWHEIGHT,
               child: Row(
@@ -479,6 +482,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ], //<Widget>[]
               ), //Row
             ),
+            SizedBox(height: 10),
             Container(
               height: ROWHEIGHT,
               child: Row(
@@ -488,23 +492,23 @@ class _MyHomePageState extends State<MyHomePage> {
                   ), //SizedBox
                   /** Checkbox Widget **/
                   Checkbox(
-                    value: arrbFieldSelections[FIELD_BIRTHDAY],
+                    value: arrbFieldSelections[FIELD_DATES],
                     onChanged: (bool value) {
                       setState(() {
-                        onBirthdayCheckboxChanged(value);
+                        onDatesCheckboxChanged(value);
                       });
                     },
                   ), //Checkbox
                   SizedBox(width: AFTERCHECKBOX), //SizedBox
                   Text(
-                    'Birthday',
+                    'Dates: Birthday, Anniversary',
                     style: TextStyle(fontSize: TEXTSIZE),
                   ), //Text
                 ], //<Widget>[]
               ), //Row
             ),
             SizedBox(
-              height: 30,
+              height: 25,
             ),
             ElevatedButton(
               onPressed: () => _setFieldsOfAllContacts(true),
