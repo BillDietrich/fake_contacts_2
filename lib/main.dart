@@ -71,14 +71,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     prefs = await SharedPreferences.getInstance();
     sPhoneNumberTemplate = prefs.getString('sPhoneNumberTemplate');
-    //log("getStoredSettings: retrieved last names " + (sListOfLastNames ?? "null"));
     if (sPhoneNumberTemplate == null) {
       sLabel = "private";
       sPhoneNumberTemplate = "+2134567nnnn";
       sEmailAddressTemplate = "FIRST.LAST@example.com";
       sStreetTemplate = "123 FIRST St";
-      sCityTemplate = "LAST";
-      sRegionTemplate = "CA";
+      sCityTemplate = "New York";
+      sRegionTemplate = "NY";
       arrbFieldSelections = [false, false, false];
       savePhoneNumberTemplate();
       saveEmailAddressTemplate();
@@ -96,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
       arrbFieldSelections[0] = prefs.getBool('bFieldSelection0');
       arrbFieldSelections[1] = prefs.getBool('bFieldSelection1');
       arrbFieldSelections[2] = prefs.getBool('bFieldSelection2');
+      log("getStoredSettings: retrieved " + arrbFieldSelections[0].toString() + arrbFieldSelections[1].toString() + arrbFieldSelections[2].toString());
     }
 
     labelController.text = sLabel;
@@ -109,10 +109,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void saveFieldSelections(bool bIgnored) async {
     log("saveFieldSelections: called");
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    log("saveFieldSelections: save " + arrbFieldSelections[0].toString() + arrbFieldSelections[1].toString() + arrbFieldSelections[2].toString());
     await prefs.setBool("bFieldSelection0", arrbFieldSelections[0]);
     await prefs.setBool("bFieldSelection1", arrbFieldSelections[1]);
     await prefs.setBool("bFieldSelection2", arrbFieldSelections[2]);
+
+    prefs = await SharedPreferences.getInstance();
   }
 
   void saveLabel() async {
@@ -363,7 +366,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const ROWHEIGHT = 25.0;
   static const TEXTBOXWIDTH = 225.0;
   static const TEXTSIZE = 17.0;
-  static const BEFORECHECKBOX = 5.0;
+  static const BEFORECHECKBOX = 10.0;
   static const AFTERCHECKBOX = 2.0;
 
   @override
@@ -392,7 +395,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChanged: _changedLabel,
                 controller: labelController,
                 maxLines: 1,
-                initialValue: sLabel,
                 decoration: new InputDecoration(
                   labelText: 'Label for all fields',
                   focusedBorder: OutlineInputBorder(
@@ -414,7 +416,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChanged: _changedPhoneNumberTemplate,
                 controller: phoneNumberTemplateController,
                 maxLines: 1,
-                initialValue: sPhoneNumberTemplate,
                 decoration: new InputDecoration(
                   labelText: 'Phone number template',
                   focusedBorder: OutlineInputBorder(
@@ -435,7 +436,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 key: keyEmailAddressTemplate,
                 onChanged: _changedEmailAddressTemplate,
                 maxLines: 1,
-                initialValue: sEmailAddressTemplate,
                 controller: emailAddressTemplateController,
                 decoration: new InputDecoration(
                   labelText: 'Email address template',
@@ -463,7 +463,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         key: keyStreetTemplate,
                         onChanged: _changedStreetTemplate,
                         maxLines: 1,
-                        initialValue: sStreetTemplate,
                         controller: streetTemplateController,
                         decoration: new InputDecoration(
                           labelText: 'Street',
@@ -485,7 +484,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         key: keyCityTemplate,
                         onChanged: _changedCityTemplate,
                         maxLines: 1,
-                        initialValue: sCityTemplate,
                         controller: cityTemplateController,
                         decoration: new InputDecoration(
                           labelText: 'City',
@@ -507,7 +505,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         key: keyRegionTemplate,
                         onChanged: _changedRegionTemplate,
                         maxLines: 1,
-                        initialValue: sRegionTemplate,
                         controller: regionTemplateController,
                         decoration: new InputDecoration(
                           labelText: 'Region',
@@ -534,7 +531,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   backgroundColor:
                       MaterialStateProperty.all<Color>(Colors.lightGreen)),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Container(
               height: ROWHEIGHT,
               child: Row(
@@ -559,7 +556,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ], //<Widget>[]
               ), //Row
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Container(
               height: ROWHEIGHT,
               child: Row(
@@ -584,7 +581,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ], //<Widget>[]
               ), //Row
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Container(
               height: ROWHEIGHT,
               child: Row(

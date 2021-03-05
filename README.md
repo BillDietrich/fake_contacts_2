@@ -1,6 +1,6 @@
 # Fake Contacts 2
 
-Android phone app that puts fake information in unused fields of your phone contacts.  This feeds fake data to any apps or companies who are copying our private data to use or sell it.  This is called "data-poisoning".
+Android phone app that puts fake information in certain fields of your phone contacts.  This feeds fake data to any apps or companies who are copying our private data to use or sell it.  This is called "data-poisoning".
 
 [NOT READY YET !!! DO NOT USE !!!]
 
@@ -18,11 +18,21 @@ The user can set choose which contact fields to modify, and phone-number and ema
 
 <img src="UsingTheApp.jpg" width="190" height="400" />
 
+The contacts database contains some fields (email, phone, address) which contain labeled values where the LABEL can be a standard value (home, work) or any invented value, and some standard fields (name, company, title, avatar).  The first part of this app's page specifies invented values to be put in email/LABEL, phone/LABEL, address/LABEL.  THe middle part of this app's page (the check-boxes) specifies which of the standard fields are to be modified.
+
 The default values should be sensible.
 
-So, just install and launch the application, and click the "Select Unused Fields" button.  The system should ask you to grant Contacts permission to the application.  Then the check-boxes will be set to reflect what fields are unused in **all** contacts.  Click the "Fill Selected Fields" button.  Then the selected fields for **all** contacts will be modified.  Launch your usual Contacts app and open any contacts to see the new information.  Note: it may take a couple of minutes to update the contacts.
+So, just install and launch the application, and click the "Scan Fields of All Contacts" button.  The system should ask you to grant Contacts permission to the application.  Then the check-boxes will be set to reflect what fields are unused in **all** contacts; a box is checked if no contact has data in that field.
 
-If you wish, click the "Clear Selected Fields" button to delete the selected information from **all** contacts.  Note: it may take a couple of minutes to update the list.  You also could use your normal Contacts app to delete the information manually at any time, without causing any problem.
+[WARNING: If you change the check-boxes, you could lose data in the next step.]
+
+Click the "Fill Selected Fields" button.  Then the invented fields for **all** contacts will be set (new email, phone and address values labeled as "LABEL" will be created), and checked fields for **all** contacts will be set.
+
+Launch your usual Contacts app and open any contact to see the new information.  Note: it may take a couple of minutes to update the contacts.
+
+[WARNING: If you change the check-boxes, you could lose data in the next step.]
+
+If you wish, click the "Clear Selected Fields" button to delete the checked field and "LABEL" fields from **all** contacts.  Note: it may take a couple of minutes to update the list.  You also could use your normal Contacts app to delete the information manually at any time, without causing any problem.
 
 You could uninstall this app after creating the fake information, without causing any problem.
 
@@ -32,6 +42,8 @@ You could uninstall this app after creating the fake information, without causin
 * The phone-number template is a single value used for all contacts.  Any character "n" in it will be replaced by a digit 0-9, derived from the contact's last name.  The default format is ```+2134567nnnn```, which is intended to use an unassigned country code "21".  You could delete the contents of this field if you wish, and no phone numbers will be generated.
 
 * The email-address template is a single value used for all contacts.  Any string "FIRST" in it will be replaced by the contact's first name.  Any string "LAST" in it will be replaced by the contact's last name.  The default format is ```FIRST.LAST@example.com```, which is intended to be an unused email domain.  You could delete the contents of this field if you wish, and no email addresses will be generated.
+
+* The postal-address template is a triple-value used for all contacts.  Any string "FIRST" in the values will be replaced by the contact's first name.  Any string "LAST" in the values will be replaced by the contact's last name.  The default format is ```123 FIRST St``` ```New York``` ```NY```.  You could delete the contents of any of these fields if you wish, and no postal addresses will be generated.
 
 
 ### Quirks
