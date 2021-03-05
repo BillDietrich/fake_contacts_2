@@ -162,21 +162,68 @@ class _MyHomePageState extends State<MyHomePage> {
       log("_scanFieldsOfAllContacts: no permission");
     } else {
       // Either the permission was already granted before or the user just granted it.
+      arrbFieldSelections = [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ];
       log("_scanFieldsOfAllContacts: about to call ContactsService.getContacts");
       Iterable<Contact> iContacts = await ContactsService.getContacts();
       log("_scanFieldsOfAllContacts: iContacts.length " + iContacts.length.toString());
       for (var c in iContacts) {
+        log("_scanFieldsOfAllContacts: identifier " + c.identifier);
         log("_scanFieldsOfAllContacts: givenName " + c.givenName);
         Iterable<Item> iEmails = c.emails;
-        log("_scanFieldsOfAllContacts: iEmails " + iEmails.toString());
+        for (var e in iEmails) {
+          log("_scanFieldsOfAllContacts: e.label " + e.label + ", e.value " + e.value);
+          switch (e.label) {
+            case "home":
+            case "work":
+              continue;
+            default:
+              arrbFieldSelections[FIELD_EMAILS] = false;
+          }
+        }
         Iterable<Item> iPhones = c.phones;
+        for (var p in iPhones) {
+          log("_scanFieldsOfAllContacts: p.label " + p.label + ", p.value " + p.value);
+          switch (p.label) {
+            case "mobile":
+            case "movil":
+            case "móvil":
+            case "home":
+            case "work":
+              continue;
+            default:
+              arrbFieldSelections[FIELD_PHONES] = false;
+          }
+        }
         Iterable<PostalAddress> iAddresses = c.postalAddresses;
+        for (var a in iAddresses) {
+          log("_scanFieldsOfAllContacts: a.label " + a.label + ", a.city " + a.city);
+          arrbFieldSelections[FIELD_POSTALADDRESSES] = false;
+        }
         String sCompany = c.company;
+        if (c.company != null)
+          arrbFieldSelections[FIELD_COMPANYANDTITLE] = false;
         String sTitle = c.jobTitle;
+        if (c.jobTitle != null)
+          arrbFieldSelections[FIELD_COMPANYANDTITLE] = false;
         //List<Uint8> uAvatar = c.avatar;
-        //Uint8List lAvatar = c.avatar.;
+        //Uint8List lAvatar = c.avatar;
+        if (c.avatar != null) {
+          // https://api.flutter.dev/flutter/painting/MemoryImage-class.html
+          var _image = MemoryImage(c.avatar);
+          log("_scanFieldsOfAllContacts: _image " + _image.toString());
+          arrbFieldSelections[FIELD_AVATAR] = false;
+        }
       }
     }
+    saveFieldSelections(true);
     log("_scanFieldsOfAllContacts: about to return");
   }
 
