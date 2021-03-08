@@ -1,6 +1,6 @@
 //import 'dart:convert';
 import 'dart:developer';
-//import 'dart:ffi';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -64,12 +64,18 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController streetTemplateController = TextEditingController();
   TextEditingController cityTemplateController = TextEditingController();
   TextEditingController regionTemplateController = TextEditingController();
+  Checkbox wCompany = null;
+  Checkbox wAvatar = null;
+  Checkbox wDate = null;
+
+  SharedPreferences prefs = null;
 
   Future<void> getStoredSettings() async {
     log("getStoredSettings: called");
-    SharedPreferences prefs;
 
-    prefs = await SharedPreferences.getInstance();
+    if (prefs == null)
+      prefs = await SharedPreferences.getInstance();
+
     sPhoneNumberTemplate = prefs.getString('sPhoneNumberTemplate');
     if (sPhoneNumberTemplate == null) {
       sLabel = "private";
@@ -84,7 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
       saveStreetTemplate();
       saveCityTemplate();
       saveRegionTemplate();
-      saveFieldSelections(true);
+      saveCompanySelection(true);
+      saveAvatarSelection(true);
+      saveDateSelection(true);
     } else {
       sLabel = prefs.getString('sLabel');
       sPhoneNumberTemplate = prefs.getString('sPhoneNumberTemplate');
@@ -95,7 +103,10 @@ class _MyHomePageState extends State<MyHomePage> {
       arrbFieldSelections[0] = prefs.getBool('bFieldSelection0');
       arrbFieldSelections[1] = prefs.getBool('bFieldSelection1');
       arrbFieldSelections[2] = prefs.getBool('bFieldSelection2');
-      log("getStoredSettings: retrieved " + arrbFieldSelections[0].toString() + arrbFieldSelections[1].toString() + arrbFieldSelections[2].toString());
+      log("getStoredSettings: retrieved " +
+          arrbFieldSelections[0].toString() +
+          arrbFieldSelections[1].toString() +
+          arrbFieldSelections[2].toString());
     }
 
     labelController.text = sLabel;
@@ -106,57 +117,58 @@ class _MyHomePageState extends State<MyHomePage> {
     regionTemplateController.text = sRegionTemplate;
   }
 
-  void saveFieldSelections(bool bIgnored) async {
-    log("saveFieldSelections: called");
+  void saveCompanySelection(bool bIgnored) async {
+    log("saveCompanySelection: called");
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    log("saveFieldSelections: save " + arrbFieldSelections[0].toString() + arrbFieldSelections[1].toString() + arrbFieldSelections[2].toString());
-    await prefs.setBool("bFieldSelection0", arrbFieldSelections[0]);
-    await prefs.setBool("bFieldSelection1", arrbFieldSelections[1]);
-    await prefs.setBool("bFieldSelection2", arrbFieldSelections[2]);
+    //wCompany.value = true;
+    await prefs.setBool("bFieldSelection" + FIELD_COMPANYANDTITLE.toString(), arrbFieldSelections[FIELD_COMPANYANDTITLE]);
+  }
 
-    prefs = await SharedPreferences.getInstance();
+  void saveAvatarSelection(bool bIgnored) async {
+    log("saveAvatarSelection: called");
+
+    await prefs.setBool("bFieldSelection" + FIELD_AVATAR.toString(), arrbFieldSelections[FIELD_AVATAR]);
+  }
+
+  void saveDateSelection(bool bIgnored) async {
+    log("saveDateSelection: called");
+
+    await prefs.setBool("bFieldSelection" + FIELD_DATES.toString(), arrbFieldSelections[FIELD_DATES]);
   }
 
   void saveLabel() async {
     log("saveLabel: called");
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("sLabel", sLabel);
   }
 
   void savePhoneNumberTemplate() async {
     log("savePhoneNumberTemplate: called");
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("sPhoneNumberTemplate", sPhoneNumberTemplate);
   }
 
   void saveEmailAddressTemplate() async {
     log("saveEmailAddressTemplate: called");
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("sEmailAddressTemplate", sEmailAddressTemplate);
   }
 
   void saveStreetTemplate() async {
     log("saveStreetTemplate: called");
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("sStreetTemplate", sStreetTemplate);
   }
 
   void saveCityTemplate() async {
     log("saveCityTemplate: called");
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("sCityTemplate", sCityTemplate);
   }
 
   void saveRegionTemplate() async {
     log("saveRegionTemplate: called");
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("sRegionTemplate", sRegionTemplate);
   }
 
@@ -263,7 +275,13 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
     }
-    saveFieldSelections(true);
+    log("_scanFieldsOfAllContacts: setting " +
+      arrbFieldSelections[0].toString() +
+      arrbFieldSelections[1].toString() +
+      arrbFieldSelections[2].toString());
+    saveCompanySelection(true);
+    saveAvatarSelection(true);
+    saveDateSelection(true);
     log("_scanFieldsOfAllContacts: about to return");
   }
 
@@ -275,11 +293,21 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       // Either the permission was already granted before or the user just granted it.
       log("_setFieldsOfAllContacts: about to call ContactsService.getContacts");
-      //Iterable<Contact> iContacts = await ContactsService.getContacts();
-      Iterable<Contact> iContacts = null;
+      Iterable<Contact> iContacts = await ContactsService.getContacts();
       for (var c in iContacts) {
-        log("_setFieldsOfAllContacts: 1 !!!");
-        //await ContactsService.deleteContact(c); // !!!
+        // remove any existing fields that match settings
+        List<Item> iEmails = c.emails.toList();
+        log("_setFieldsOfAllContacts: emails before remove " + iEmails.toString());
+        iEmails.removeWhere((element) => (element.label == sLabel));
+        log("_setFieldsOfAllContacts: emails after remove " + iEmails.toString());
+        if (bSet) {
+          var sEmail = generateEmailAddress(c.familyName, c.givenName);
+          iEmails.add(Item(label: sLabel, value: sEmail));
+          log("_setFieldsOfAllContacts: emails after add " + iEmails.toString());
+        }
+        c.emails = iEmails;
+        log("_setFieldsOfAllContacts: about to call ContactsService.updateContact");
+        await ContactsService.updateContact(c);
       }
     }
     log("_setFieldsOfAllContacts: about to return");
@@ -333,34 +361,23 @@ class _MyHomePageState extends State<MyHomePage> {
     saveRegionTemplate();
   }
 
-  // this gets called every time a check-box gets changed
-  void _changedFieldSelections(int nIndex, bool bNewValue) {
-    log("_changedFieldSelections: called, nIndex " +
-        nIndex.toString() +
-        ", bNewValue " +
-        bNewValue.toString());
-    arrbFieldSelections[nIndex] = bNewValue;
-
-    saveFieldSelections(true);
-  }
-
   void onCompanyAndTitleCheckboxChanged(bool bNewValue) {
     log("onCompanyAndTitleCheckboxChanged: called, bNewValue " +
         bNewValue.toString());
     arrbFieldSelections[FIELD_COMPANYANDTITLE] = bNewValue;
-    saveFieldSelections(true);
+    saveCompanySelection(true);
   }
 
   void onAvatarCheckboxChanged(bool bNewValue) {
     log("onAvatarCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_AVATAR] = bNewValue;
-    saveFieldSelections(true);
+    saveAvatarSelection(true);
   }
 
   void onDatesCheckboxChanged(bool bNewValue) {
     log("onDatesCheckboxChanged: called, bNewValue " + bNewValue.toString());
     arrbFieldSelections[FIELD_DATES] = bNewValue;
-    saveFieldSelections(true);
+    saveDateSelection(true);
   }
 
   static const ROWHEIGHT = 25.0;
@@ -540,7 +557,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: BEFORECHECKBOX,
                   ), //SizedBox
                   /** Checkbox Widget **/
-                  Checkbox(
+                  wCompany = Checkbox(
                     value: arrbFieldSelections[FIELD_COMPANYANDTITLE],
                     onChanged: (bool value) {
                       setState(() {
@@ -565,7 +582,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: BEFORECHECKBOX,
                   ), //SizedBox
                   /** Checkbox Widget **/
-                  Checkbox(
+                  wAvatar = Checkbox(
                     value: arrbFieldSelections[FIELD_AVATAR],
                     onChanged: (bool value) {
                       setState(() {
@@ -590,7 +607,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: BEFORECHECKBOX,
                   ), //SizedBox
                   /** Checkbox Widget **/
-                  Checkbox(
+                  wDate = Checkbox(
                     value: arrbFieldSelections[FIELD_DATES],
                     onChanged: (bool value) {
                       setState(() {
