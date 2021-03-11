@@ -38,6 +38,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
 class _MyHomePageState extends State<MyHomePage> {
   String sLabel = "";
   String sPhoneNumberTemplate = "";
@@ -78,13 +79,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     sPhoneNumberTemplate = prefs.getString('sPhoneNumberTemplate');
     if (sPhoneNumberTemplate == null) {
-      sLabel = "private";
+      sLabel = "other";
       sPhoneNumberTemplate = "+2134567nnnn";
       sEmailAddressTemplate = "FIRST.LAST@example.com";
       sStreetTemplate = "123 FIRST St";
-      sCityTemplate = "New York";
+      sCityTemplate = "NY";
       sRegionTemplate = "NY";
       arrbFieldSelections = [false, false, false];
+      saveLabel();
       savePhoneNumberTemplate();
       saveEmailAddressTemplate();
       saveStreetTemplate();
@@ -202,10 +204,13 @@ class _MyHomePageState extends State<MyHomePage> {
   String generateEmailAddress(String sLastName, String sFirstName) {
     return sEmailAddressTemplate
         .replaceAll("FIRST", sFirstName)
-        .replaceAll("LAST", sLastName);
+        .replaceAll("LAST", sLastName)
+        .replaceAll(" ", "");
   }
 
   String generatePostalAddress(String sLastName, String sFirstName) {
+    if (sFirstName == null)
+      sFirstName = "";
     return (sStreetTemplate
             .replaceAll("FIRST", sFirstName)
             .replaceAll("LAST", sLastName)) +
@@ -219,72 +224,6 @@ class _MyHomePageState extends State<MyHomePage> {
             .replaceAll("LAST", sLastName));
   }
 
-  Future<void> _scanFieldsOfAllContacts() async {
-    log("_scanFieldsOfAllContacts: about to call Permission.contacts.request");
-    PermissionStatus permission = await Permission.contacts.request();
-    if (!permission.isGranted) {
-      log("_scanFieldsOfAllContacts: no permission");
-    } else {
-      // Either the permission was already granted before or the user just granted it.
-      arrbFieldSelections = [
-        true,
-        true,
-        true,
-      ];
-      log("_scanFieldsOfAllContacts: about to call ContactsService.getContacts");
-      Iterable<Contact> iContacts = await ContactsService.getContacts();
-      log("_scanFieldsOfAllContacts: iContacts.length " +
-          iContacts.length.toString());
-      for (var c in iContacts) {
-        log("_scanFieldsOfAllContacts: identifier " + c.identifier);
-        log("_scanFieldsOfAllContacts: givenName " + c.givenName);
-        Iterable<Item> iEmails = c.emails;
-        for (var e in iEmails) {
-          log("_scanFieldsOfAllContacts: e.label " +
-              e.label +
-              ", e.value " +
-              e.value);
-        }
-        Iterable<Item> iPhones = c.phones;
-        for (var p in iPhones) {
-          log("_scanFieldsOfAllContacts: p.label " +
-              p.label +
-              ", p.value " +
-              p.value);
-        }
-        Iterable<PostalAddress> iAddresses = c.postalAddresses;
-        for (var a in iAddresses) {
-          log("_scanFieldsOfAllContacts: a.label " +
-              a.label +
-              ", a.city " +
-              a.city);
-        }
-        String sCompany = c.company;
-        if (c.company != null)
-          arrbFieldSelections[FIELD_COMPANYANDTITLE] = false;
-        String sTitle = c.jobTitle;
-        if (c.jobTitle != null)
-          arrbFieldSelections[FIELD_COMPANYANDTITLE] = false;
-        //List<Uint8> uAvatar = c.avatar;
-        //Uint8List lAvatar = c.avatar;
-        if (c.avatar != null) {
-          // https://api.flutter.dev/flutter/painting/MemoryImage-class.html
-          var _image = MemoryImage(c.avatar);
-          log("_scanFieldsOfAllContacts: _image " + _image.toString());
-          arrbFieldSelections[FIELD_AVATAR] = false;
-        }
-      }
-    }
-    log("_scanFieldsOfAllContacts: setting " +
-      arrbFieldSelections[0].toString() +
-      arrbFieldSelections[1].toString() +
-      arrbFieldSelections[2].toString());
-    saveCompanySelection(true);
-    saveAvatarSelection(true);
-    saveDateSelection(true);
-    log("_scanFieldsOfAllContacts: about to return");
-  }
-
   Future<void> _setFieldsOfAllContacts(bool bSet) async {
     log("_setFieldsOfAllContacts: about to call Permission.contacts.request");
     PermissionStatus permission = await Permission.contacts.request();
@@ -295,19 +234,35 @@ class _MyHomePageState extends State<MyHomePage> {
       log("_setFieldsOfAllContacts: about to call ContactsService.getContacts");
       Iterable<Contact> iContacts = await ContactsService.getContacts();
       for (var c in iContacts) {
+        log("_setFieldsOfAllContacts: identifier " + c.identifier);
+        String sFirstName = c.givenName;
+        if (sFirstName == null)
+          sFirstName = "";
+        log("_setFieldsOfAllContacts: givenName " + sFirstName);
+        String sLastName = c.familyName;
+        if (sLastName == null)
+          sLastName = "";
+        log("_setFieldsOfAllContacts: familyName " + sLastName);
         // remove any existing fields that match settings
-        List<Item> iEmails = c.emails.toList();
-        log("_setFieldsOfAllContacts: emails before remove " + iEmails.toString());
-        iEmails.removeWhere((element) => (element.label == sLabel));
-        log("_setFieldsOfAllContacts: emails after remove " + iEmails.toString());
-        if (bSet) {
-          var sEmail = generateEmailAddress(c.familyName, c.givenName);
-          iEmails.add(Item(label: sLabel, value: sEmail));
-          log("_setFieldsOfAllContacts: emails after add " + iEmails.toString());
+        List<Item> lOldEmails = c.emails.toList();
+        List<Item> lNewEmails = [];
+        log("_setFieldsOfAllContacts: before remove sLabel " + sLabel + " == " + lOldEmails.length.toString());
+        for (var e in lOldEmails) {
+        log("_setFieldsOfAllContacts: old " + e.label + ", " + e.value);
+          if (e.label != sLabel)
+            lNewEmails.add(e);
         }
-        c.emails = iEmails;
+        log("_setFieldsOfAllContacts: emails after remove == " + lNewEmails.length.toString());
+        if (bSet) {
+          var sEmail = generateEmailAddress(sLastName, sFirstName);
+          lNewEmails.add(Item(label: sLabel, value: sEmail));
+          log("_setFieldsOfAllContacts: emails after add " + lNewEmails.length.toString());
+        }
+        c.emails = lNewEmails;
         log("_setFieldsOfAllContacts: about to call ContactsService.updateContact");
         await ContactsService.updateContact(c);
+        log("_setFieldsOfAllContacts: return after first");
+        return;   // temp !!!
       }
     }
     log("_setFieldsOfAllContacts: about to return");
@@ -541,14 +496,6 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 30,
             ),
-            ElevatedButton(
-              onPressed: () => _scanFieldsOfAllContacts(),
-              child: Text("Scan Fields of All Contacts"),
-              style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.lightGreen)),
-            ),
-            SizedBox(height: 15),
             Container(
               height: ROWHEIGHT,
               child: Row(

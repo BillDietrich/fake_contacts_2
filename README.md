@@ -8,29 +8,23 @@ Android phone app that puts fake information in certain fields of your phone con
 
 The app will be available through F-Droid.
 
-This is a sister-application to "Fake Contacts", which creates new fake contacts.
+This is a sister-application to "Fake Contacts", which creates new fake contacts.  You could use  "Fake Contacts" first to create a lot of fake contacts, then use this app  "Fake Contacts 2" to put fake info in certain fields of ALL contacts, both fake and real.
 
 ## Functionality
-The user can set choose which contact fields to modify, and phone-number and email-address templates for them.  Then click buttons to set or delete fake info into those fields of all contacts.
+The user can choose which contact fields to modify, and phone-number and email-address templates for them.  Then click buttons to set or delete fake info into those fields of all contacts.
 
 
 ## Use
 
 <img src="UsingTheApp.jpg" width="190" height="400" />
 
-The contacts database contains some fields (email, phone, address) which contain labeled values where the LABEL can be a standard value (home, work) or any invented value, and some standard fields (name, company, title, avatar).  The first part of this app's page specifies invented values to be put in email/LABEL, phone/LABEL, address/LABEL.  THe middle part of this app's page (the check-boxes) specifies which of the standard fields are to be modified.
+The contacts database contains some fields (email, phone, address) which contain labeled values where the LABEL can be a standard value (home, work, other), and some standard fields (name, company, title, avatar).  The first part of this app's page specifies invented values to be put in email/LABEL, phone/LABEL, address/LABEL.  The middle part of this app's page (the check-boxes) specifies which of the standard fields are to be modified.
 
-The default values should be sensible.
+The default values should be sensible.  But think about your existing real contacts and what fields they use.  You don't want to overwrite any real data with fake data.  Un-check or delete data from fields you don't want modified.
 
-So, just install and launch the application, and click the "Scan Fields of All Contacts" button.  The system should ask you to grant Contacts permission to the application.  Then the check-boxes will be set to reflect what fields are unused in **all** contacts; a box is checked if no contact has data in that field.
-
-[WARNING: If you change the check-boxes, you could lose data in the next step.]
-
-Click the "Fill Selected Fields" button.  Then the invented fields for **all** contacts will be set (new email, phone and address values labeled as "LABEL" will be created), and checked fields for **all** contacts will be set.
+Click the "Fill Selected Fields" button.  The system should ask you to grant Contacts permission to the application.  Then the invented fields for **all** contacts will be set (new email, phone and address values labeled as "LABEL" will be created), and checked fields for **all** contacts will be set.
 
 Launch your usual Contacts app and open any contact to see the new information.  Note: it may take a couple of minutes to update the contacts.
-
-[WARNING: If you change the check-boxes, you could lose data in the next step.]
 
 If you wish, click the "Clear Selected Fields" button to delete the checked field and "LABEL" fields from **all** contacts.  Note: it may take a couple of minutes to update the list.  You also could use your normal Contacts app to delete the information manually at any time, without causing any problem.
 
@@ -38,6 +32,10 @@ You could uninstall this app after creating the fake information, without causin
 
 
 ### Customizing
+
+* The label field is a single value used for LABELs on email addresses, postal addresses, and phone numbers.  You could delete the contents of this field if you wish, and no fake email addresses, postal addresses, and phone numbers will be generated.
+
+I think this field is limited (by the standard Contacts app) to specific lowercase values: home, work, other, mobile, custom.
 
 * The phone-number template is a single value used for all contacts.  Any character "n" in it will be replaced by a digit 0-9, derived from the contact's last name.  The default format is ```+2134567nnnn```, which is intended to use an unassigned country code "21".  You could delete the contents of this field if you wish, and no phone numbers will be generated.
 
