@@ -65,11 +65,11 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController streetTemplateController = TextEditingController();
   TextEditingController cityTemplateController = TextEditingController();
   TextEditingController regionTemplateController = TextEditingController();
-  Checkbox wCompany = null;
-  Checkbox wAvatar = null;
-  Checkbox wDate = null;
+  Checkbox wCompany;
+  Checkbox wAvatar;
+  Checkbox wDate;
 
-  SharedPreferences prefs = null;
+  SharedPreferences prefs;
 
   Future<void> getStoredSettings() async {
     log("getStoredSettings: called");
@@ -208,20 +208,18 @@ class _MyHomePageState extends State<MyHomePage> {
         .replaceAll(" ", "");
   }
 
-  String generatePostalAddress(String sLastName, String sFirstName) {
-    if (sFirstName == null)
-      sFirstName = "";
-    return (sStreetTemplate
+  PostalAddress generatePostalAddress(String sLastName, String sFirstName) {
+    PostalAddress a = new PostalAddress();
+    a.street = sStreetTemplate
             .replaceAll("FIRST", sFirstName)
-            .replaceAll("LAST", sLastName)) +
-        ", " +
-        (sCityTemplate
+            .replaceAll("LAST", sLastName);
+    a.city = sCityTemplate
             .replaceAll("FIRST", sFirstName)
-            .replaceAll("LAST", sLastName)) +
-        " " +
-        (sRegionTemplate
+            .replaceAll("LAST", sLastName);
+    a.region = sRegionTemplate
             .replaceAll("FIRST", sFirstName)
-            .replaceAll("LAST", sLastName));
+            .replaceAll("LAST", sLastName);
+    return a;
   }
 
   Future<void> _setFieldsOfAllContacts(bool bSet) async {
@@ -234,6 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
       log("_setFieldsOfAllContacts: about to call ContactsService.getContacts");
       Iterable<Contact> iContacts = await ContactsService.getContacts();
       for (var c in iContacts) {
+
         log("_setFieldsOfAllContacts: identifier " + c.identifier);
         String sFirstName = c.givenName;
         if (sFirstName == null)
@@ -243,24 +242,64 @@ class _MyHomePageState extends State<MyHomePage> {
         if (sLastName == null)
           sLastName = "";
         log("_setFieldsOfAllContacts: familyName " + sLastName);
-        // remove any existing fields that match settings
-        List<Item> lOldEmails = c.emails.toList();
-        List<Item> lNewEmails = [];
-        log("_setFieldsOfAllContacts: before remove sLabel " + sLabel + " == " + lOldEmails.length.toString());
-        for (var e in lOldEmails) {
-        log("_setFieldsOfAllContacts: old " + e.label + ", " + e.value);
-          if (e.label != sLabel)
-            lNewEmails.add(e);
+
+        if ((sLabel.length > 0) && (sPhoneNumberTemplate.length > 0)) {
+          List<Item> lOldPhones = c.phones.toList();
+          List<Item> lNewPhones = [];
+          log("_setFieldsOfAllContacts: before remove sLabel " + sLabel + " == " + lOldPhones.length.toString());
+          for (var p in lOldPhones) {
+            log("_setFieldsOfAllContacts: old " + p.label + ", " + p.value);
+            if (p.label != sLabel)
+              lNewPhones.add(p);
+          }
+          log("_setFieldsOfAllContacts: phones after remove == " + lNewPhones.length.toString());
+          if (bSet) {
+            var sPhone = generatePhoneNumber(sLastName);
+            lNewPhones.add(Item(label: sLabel, value: sPhone));
+            log("_setFieldsOfAllContacts: phones after add " + lNewPhones.length.toString());
+          }
+          c.phones = lNewPhones;
         }
-        log("_setFieldsOfAllContacts: emails after remove == " + lNewEmails.length.toString());
-        if (bSet) {
-          var sEmail = generateEmailAddress(sLastName, sFirstName);
-          lNewEmails.add(Item(label: sLabel, value: sEmail));
-          log("_setFieldsOfAllContacts: emails after add " + lNewEmails.length.toString());
+
+        if ((sLabel.length > 0) && (sEmailAddressTemplate.length > 0)) {
+          List<Item> lOldEmails = c.emails.toList();
+          List<Item> lNewEmails = [];
+          log("_setFieldsOfAllContacts: before remove sLabel " + sLabel + " == " + lOldEmails.length.toString());
+          for (var e in lOldEmails) {
+            log("_setFieldsOfAllContacts: old " + e.label + ", " + e.value);
+            if (e.label != sLabel)
+              lNewEmails.add(e);
+          }
+          log("_setFieldsOfAllContacts: emails after remove == " + lNewEmails.length.toString());
+          if (bSet) {
+            var sEmail = generateEmailAddress(sLastName, sFirstName);
+            lNewEmails.add(Item(label: sLabel, value: sEmail));
+            log("_setFieldsOfAllContacts: emails after add " + lNewEmails.length.toString());
+          }
+          c.emails = lNewEmails;
         }
-        c.emails = lNewEmails;
+
+        if ((sLabel.length > 0) && (sStreetTemplate.length > 0) && (sCityTemplate.length > 0) && (sRegionTemplate.length > 0)) {
+          List<PostalAddress> lOldAddresses = c.postalAddresses.toList();
+          List<PostalAddress> lNewAddresses = [];
+          log("_setFieldsOfAllContacts: before remove sLabel " + sLabel + " == " + lOldAddresses.length.toString());
+          for (var a in lOldAddresses) {
+            log("_setFieldsOfAllContacts: old " + a.label + ", " + a.street + ", " + a.city + ", " + a.region);
+            if (a.label != sLabel)
+              lNewAddresses.add(a);
+          }
+          log("_setFieldsOfAllContacts: addresses after remove == " + lNewAddresses.length.toString());
+          if (bSet) {
+            PostalAddress oAddress = generatePostalAddress(sLastName, sFirstName);
+            lNewAddresses.add(PostalAddress(label: sLabel, street: oAddress.street, city: oAddress.city, region: oAddress.region));
+            log("_setFieldsOfAllContacts: addresses after add " + lNewAddresses.length.toString());
+          }
+          c.postalAddresses = lNewAddresses;
+        }
+
         log("_setFieldsOfAllContacts: about to call ContactsService.updateContact");
         await ContactsService.updateContact(c);
+
         log("_setFieldsOfAllContacts: return after first");
         return;   // temp !!!
       }
