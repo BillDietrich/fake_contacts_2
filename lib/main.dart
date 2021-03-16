@@ -1,6 +1,7 @@
 //import 'dart:convert';
 import 'dart:developer';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -222,6 +223,30 @@ class _MyHomePageState extends State<MyHomePage> {
     return a;
   }
 
+  String generateCompany(String sLastName, String sFirstName) {
+    if (sLastName != "")
+      return sLastName + " Co.";
+    if (sFirstName != "")
+      return sFirstName + " Co.";
+    return "Acme Corp.";
+  }
+
+  DateTime generateBirthday(String sLastName, String sFirstName) {
+    int nLastName = 0;
+    int nFirstName = 0;
+
+    if (sLastName != "")
+      nLastName = sLastName.codeUnitAt(sLastName.length-1);
+    if (sFirstName != "")
+      nFirstName = sFirstName.codeUnitAt(sFirstName.length-1);
+
+    int nYear = 1960 + (nLastName % 40);
+    int nMonth = (nFirstName % 12) + 1;
+    int nDay = (nFirstName % 28) + 1;
+
+    return new DateTime(nYear, nMonth, nDay);
+  }
+
   Future<void> _setFieldsOfAllContacts(bool bSet) async {
     log("_setFieldsOfAllContacts: about to call Permission.contacts.request");
     PermissionStatus permission = await Permission.contacts.request();
@@ -295,6 +320,36 @@ class _MyHomePageState extends State<MyHomePage> {
             log("_setFieldsOfAllContacts: addresses after add " + lNewAddresses.length.toString());
           }
           c.postalAddresses = lNewAddresses;
+        }
+
+        if (arrbFieldSelections[FIELD_COMPANYANDTITLE]) {
+          String sCompany = "";
+          String sTitle = "";
+          if (bSet) {
+            sCompany = generateCompany(sLastName, sFirstName);
+            log("_setFieldsOfAllContacts: sCompany " + sCompany);
+            sTitle = "CEO";
+          }
+          c.company = sCompany;
+          c.jobTitle = sTitle;
+        }
+
+        if (arrbFieldSelections[FIELD_AVATAR]) {
+          // Android only: Get thumbnail for an avatar afterwards
+          // (only necessary if `withThumbnails: false` is used)
+          //Uint8List avatar = await ContactsService.getAvatar(contact);
+          // https://api.dart.dev/stable/2.12.1/dart-typed_data/Uint8List-class.html
+          // https://api.dart.dev/stable/2.12.1/dart-typed_data/dart-typed_data-library.html
+        }
+
+        if (arrbFieldSelections[FIELD_DATES]) {
+          DateTime oBirthday;
+          if (bSet) {
+            oBirthday = generateBirthday(sLastName, sFirstName);
+            log("_setFieldsOfAllContacts: oBirthday " + oBirthday.toString());
+          }
+          c.birthday = oBirthday;
+          // doesn't work !!!
         }
 
         log("_setFieldsOfAllContacts: about to call ContactsService.updateContact");
